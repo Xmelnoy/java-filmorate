@@ -4,8 +4,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
-import java.time.Instant;
-import java.time.Duration;
+import java.time.LocalDate;
 
 /**
  * Film.
@@ -21,8 +20,8 @@ public class Film {
     private String description;
 
     @NotNull(message = "Дата релиза не должна быть пустой")
-    private Instant releaseDate;
+    private LocalDate releaseDate;
 
     @NotNull(message = "Длительность не должна быть пустой")
-    private Duration duration;
+    private int duration;
 }

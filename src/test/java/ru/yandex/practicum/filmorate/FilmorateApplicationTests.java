@@ -30,11 +30,8 @@ public class FilmorateApplicationTests {
         validFilm = new Film();
         validFilm.setName("Тестовый фильм");
         validFilm.setDescription("Описание");
-        validFilm.setReleaseDate(LocalDate.of(2000, 1, 1)
-                .atStartOfDay(ZoneOffset.UTC)
-                .toInstant()
-        );
-        validFilm.setDuration(Duration.ofMinutes(120));
+        validFilm.setReleaseDate(LocalDate.of(2000, 1, 1));
+        validFilm.setDuration(120);
 
         userController = new UserController();
         validUser = new User();
@@ -86,10 +83,7 @@ public class FilmorateApplicationTests {
 
     @Test
     void createFilm_ReleaseDateBeforeBirthOfCinema_ThrowsException() {
-        validFilm.setReleaseDate(LocalDate.of(1895, 12, 27)
-                .atStartOfDay(ZoneOffset.UTC)
-                .toInstant()
-        );
+        validFilm.setReleaseDate(LocalDate.of(1895, 12, 27));
         assertThrows(ValidationException.class, () ->
                 filmController.create(validFilm)
         );
@@ -97,19 +91,15 @@ public class FilmorateApplicationTests {
 
     @Test
     void createFilm_ReleaseDateExactlyBirthOfCinema_Success() throws ValidationException {
-        Instant expected = LocalDate.of(1895, 12, 28)
-                .atStartOfDay(ZoneOffset.UTC)
-                .toInstant();
-
-        validFilm.setReleaseDate(expected);
+        validFilm.setReleaseDate(LocalDate.of(1895, 12, 28));
 
         Film created = filmController.create(validFilm);
-        assertEquals(expected, created.getReleaseDate());
+        assertEquals(LocalDate.of(1895, 12, 28), created.getReleaseDate());
     }
 
     @Test
     void createFilm_DurationZero_ThrowsException() {
-        validFilm.setDuration(Duration.ofMinutes(0));
+        validFilm.setDuration(0);
         assertThrows(ValidationException.class, () ->
                 filmController.create(validFilm)
         );
@@ -117,7 +107,7 @@ public class FilmorateApplicationTests {
 
     @Test
     void createFilm_DurationNegative_ThrowsException() {
-        validFilm.setDuration(Duration.ofMinutes(-10));
+        validFilm.setDuration(-10);
         assertThrows(ValidationException.class, () ->
                 filmController.create(validFilm)
         );
@@ -125,9 +115,9 @@ public class FilmorateApplicationTests {
 
     @Test
     void createFilm_DurationPositive_Success() throws ValidationException {
-        validFilm.setDuration(Duration.ofMinutes(1));
+        validFilm.setDuration(1);
         Film created = filmController.create(validFilm);
-        assertEquals(Duration.ofMinutes(1), created.getDuration());
+        assertEquals(1, created.getDuration());
     }
 
     @Test
@@ -137,16 +127,13 @@ public class FilmorateApplicationTests {
         updateData.setId(created.getId());
         updateData.setName("Обновленный фильм");
         updateData.setDescription("Новое описание");
-        updateData.setReleaseDate(LocalDate.of(2000, 1, 1)
-                .atStartOfDay(ZoneOffset.UTC)
-                .toInstant()
-        );
-        updateData.setDuration(Duration.ofMinutes(150));
+        updateData.setReleaseDate(LocalDate.of(2000, 1, 1));
+        updateData.setDuration(150);
 
         Film updated = filmController.update(updateData);
         assertEquals("Обновленный фильм", updated.getName());
         assertEquals("Новое описание", updated.getDescription());
-        assertEquals(Duration.ofMinutes(150), updated.getDuration());
+        assertEquals(150, updated.getDuration());
     }
 
     @Test
@@ -155,11 +142,8 @@ public class FilmorateApplicationTests {
         updateData.setId(999L);
         updateData.setName("Фильм");
         updateData.setDescription("Описание");
-        updateData.setReleaseDate(LocalDate.of(2000, 1, 1)
-                .atStartOfDay(ZoneOffset.UTC)
-                .toInstant()
-        );
-        updateData.setDuration(Duration.ofMinutes(120));
+        updateData.setReleaseDate(LocalDate.of(2000, 1, 1));
+        updateData.setDuration(120);
 
         assertThrows(ValidationException.class, () ->
                 filmController.update(updateData)

@@ -18,9 +18,7 @@ public class FilmController {
 
     private final Map<Long, Film> films = new HashMap<>();
 
-    private final Instant birthDayMovie = LocalDate.of(1895, 12, 28)
-            .atStartOfDay(ZoneOffset.UTC)
-            .toInstant();
+    private final LocalDate birthDayMovie = LocalDate.of(1895, 12, 28);
 
     @GetMapping
     public Collection<Film> findAll() {
@@ -44,7 +42,7 @@ public class FilmController {
             if (film.getReleaseDate().isBefore(birthDayMovie)) {
                 throw new ValidationException("Дата релиза должна быть не раньше  28 декабря 1895 года");
             }
-            if (film.getDuration().isZero() || film.getDuration().isNegative()) {
+            if (film.getDuration() <= 0) {
                 throw new ValidationException("Продолжительность фильма должна быть положительным числом");
             }
         } catch (ValidationException e) {
@@ -89,7 +87,7 @@ public class FilmController {
             if (newFilm.getReleaseDate().isBefore(birthDayMovie)) {
                 throw new ValidationException("Дата релиза должна быть не раньше  28 декабря 1895 года");
             }
-            if (newFilm.getDuration().isZero() || newFilm.getDuration().isNegative()) {
+            if (newFilm.getDuration() <= 0) {
                 throw new ValidationException("Продолжительность фильма должна быть положительным числом");
             }
         } catch (ValidationException e) {
