@@ -2,10 +2,7 @@ package ru.yandex.practicum.filmorate.model;
 
 import java.time.LocalDate;
 
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.PastOrPresent;
+import jakarta.validation.constraints.*;
 import lombok.Data;
 
 
@@ -23,6 +20,7 @@ public class User {
     * в дополнительном задании по ТЗ написано, что логин не должен содержать пробелов,
     * я не понял через какую анотацию это делается, если сможете, оставьте коментарий насчет этого
     * */
+    @Pattern(regexp = "\\S+", message = "Логин не может содержать пробелы")
     private String login;
     private String name;
 
