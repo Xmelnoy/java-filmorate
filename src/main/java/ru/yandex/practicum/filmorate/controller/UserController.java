@@ -99,17 +99,14 @@ public class UserController {
             log.warn("Пользователь с id={} не найден", newUser.getId());
             throw new ValidationException("Пользователь не найден");
         }
-        log.debug("Создаем объект копию oldUser обновляемого пользователя");
+        log.debug("Обновляем пользователя id={}", oldUser.getId());
+
         oldUser.setEmail(newUser.getEmail());
         oldUser.setLogin(newUser.getLogin());
         oldUser.setName(newUser.getName());
         oldUser.setBirthday(newUser.getBirthday());
-        log.debug("Обновление пользователя id={}:", oldUser.getId());
-        log.debug("  email: {} → {}", oldUser.getEmail(), newUser.getEmail());
-        log.debug("  login: {} → {}", oldUser.getLogin(), newUser.getLogin());
-        log.debug("  name: {} → {}", oldUser.getName(), newUser.getName());
-        log.debug("  birthday: {} → {}", oldUser.getBirthday(), newUser.getBirthday());
-        log.info("Пользователь успешно обновлен - {}", newUser);
+
+        log.info("Пользователь id={} успешно обновлён", oldUser.getId());
         return oldUser;
     }
 }
