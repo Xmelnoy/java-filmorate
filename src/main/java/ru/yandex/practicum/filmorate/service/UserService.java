@@ -74,11 +74,6 @@ public class UserService {
     }
 
     public void addFriend(Long userId, Long friendId) {
-        /*
-        * Добавил сразу проверку на то, чтоб нельзя было добавлять
-        * самого себя в друзья.
-        * По ТЗ вроде не сказано это, но я добавил для себя
-        * */
         if(userId.equals(friendId)) {
             log.warn("Пользователь {} попытался добавить себя в друзья", userId);
             throw new ValidationException("Нельзя добавить самого себя в друзья");
