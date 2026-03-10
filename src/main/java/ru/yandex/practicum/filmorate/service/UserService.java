@@ -74,7 +74,7 @@ public class UserService {
     }
 
     public void addFriend(Long userId, Long friendId) {
-        if(userId.equals(friendId)) {
+        if (userId.equals(friendId)) {
             log.warn("Пользователь {} попытался добавить себя в друзья", userId);
             throw new ValidationException("Нельзя добавить самого себя в друзья");
         }
