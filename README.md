@@ -1,4 +1,5 @@
-<img width="923" height="659" alt="Untitled" src="https://github.com/user-attachments/assets/0b6ad376-1ae6-4dc3-b24e-068507831feb" />
+<img width="929" height="749" alt="Untitled" src="https://github.com/user-attachments/assets/c61a1641-5d47-402a-a726-a05c5d56e1ae" />
+
 
 ## 1. Все фильмы с рейтингом
 ```
