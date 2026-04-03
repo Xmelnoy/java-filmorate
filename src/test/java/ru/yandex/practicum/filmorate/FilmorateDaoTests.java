@@ -23,7 +23,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @JdbcTest
 @AutoConfigureTestDatabase
 @Import({UserDbStorage.class, FilmDbStorage.class, GenreDbStorage.class, MpaDbStorage.class})
-class FilmorateApplicationTests {
+class FilmorateDaoTests {
 
     @Autowired
     private UserDbStorage userStorage;
