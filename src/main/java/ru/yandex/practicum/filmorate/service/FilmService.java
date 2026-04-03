@@ -7,8 +7,11 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.GenreStorage;
+import ru.yandex.practicum.filmorate.storage.MpaStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.time.LocalDate;
@@ -19,24 +22,28 @@ import java.util.List;
 @Service
 public class FilmService {
     private static final String VALIDATION_ERROR = "Ошибка валидации: ";
-    private static final String FILM_NOT_FOUND = "Фильм с id {} не найден";
-    private static final String FILM_NOT_FOUND_MESSAGE = "Фильм с id ";
-    private static final String USER_NOT_FOUND = "Пользователь с id {} не найден";
-    private static final String USER_NOT_FOUND_MESSAGE = "Пользователь с id ";
 
     private final FilmStorage filmStorage;
     private final UserStorage userStorage;
+    private final GenreStorage genreStorage;
+    private final MpaStorage mpaStorage;
 
     @Autowired
     public FilmService(@Qualifier("filmDbStorage") FilmStorage filmStorage,
-                       @Qualifier("userDbStorage") UserStorage userStorage) {
+                       @Qualifier("userDbStorage") UserStorage userStorage,
+                       @Qualifier("genreDbStorage") GenreStorage genreStorage,
+                       @Qualifier("mpaDbStorage") MpaStorage mpaStorage) {
         this.filmStorage = filmStorage;
         this.userStorage = userStorage;
+        this.genreStorage = genreStorage;
+        this.mpaStorage = mpaStorage;
     }
 
     public Film createFilm(Film film) {
         log.debug("Создание фильма с названием: {}", film.getName());
         validateFilm(film);
+        validateMpaAndGenres(film);
+
         Film createdFilm = filmStorage.addFilm(film);
         log.debug("Фильм успешно создан с id: {}", createdFilm.getId());
         return createdFilm;
@@ -52,6 +59,7 @@ public class FilmService {
         }
 
         filmStorage.getFilmById(film.getId());
+        validateMpaAndGenres(film);
 
         Film updatedFilm = filmStorage.updateFilm(film);
         log.debug("Фильм с id {} успешно обновлен", updatedFilm.getId());
@@ -131,6 +139,24 @@ public class FilmService {
         if (film.getMpa() == null || film.getMpa().getId() == null) {
             log.error(VALIDATION_ERROR + "рейтинг MPA должен быть указан");
             throw new ValidationException("Рейтинг MPA должен быть указан");
+        }
+    }
+
+    private void validateMpaAndGenres(Film film) {
+        Integer mpaId = film.getMpa().getId();
+        log.debug("Проверяем существование рейтинга MPA с id: {}", mpaId);
+        mpaStorage.getMpaById(mpaId);
+
+        if (film.getGenres() != null) {
+            for (Genre genre : film.getGenres()) {
+                if (genre == null || genre.getId() == null) {
+                    log.error(VALIDATION_ERROR + "жанр фильма указан некорректно");
+                    throw new ValidationException("Жанр фильма указан некорректно");
+                }
+
+                log.debug("Проверяем существование жанра с id: {}", genre.getId());
+                genreStorage.getGenreById(genre.getId());
+            }
         }
     }
 }
