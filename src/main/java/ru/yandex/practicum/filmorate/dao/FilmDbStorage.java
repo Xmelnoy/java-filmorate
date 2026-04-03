@@ -11,9 +11,14 @@ import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
-import java.sql.*;
 import java.sql.Date;
-import java.util.*;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 
 @Repository
 @RequiredArgsConstructor
@@ -39,6 +44,7 @@ public class FilmDbStorage implements FilmStorage {
 
         film.setId(keyHolder.getKey().longValue());
         saveGenres(film);
+
         return getFilmById(film.getId());
     }
 
@@ -69,8 +75,8 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public void deleteFilm(Long id) {
         String sql = "DELETE FROM films WHERE film_id = ?";
-        int rowsDeleted = jdbcTemplate.update(sql, id);
 
+        int rowsDeleted = jdbcTemplate.update(sql, id);
         if (rowsDeleted == 0) {
             throw new NotFoundException("Фильм с id=" + id + " не найден");
         }
@@ -89,6 +95,7 @@ public class FilmDbStorage implements FilmStorage {
         film.setLikes(loadLikes(film.getId()));
         film.setGenres(loadGenres(film.getId()));
         film.setMpa(loadMpa(film.getMpa().getId()));
+
         return film;
     }
 
@@ -120,9 +127,11 @@ public class FilmDbStorage implements FilmStorage {
 
     private Set<Long> loadLikes(Long filmId) {
         String sql = "SELECT user_id FROM film_likes WHERE film_id = ?";
-        return new HashSet<>(jdbcTemplate.query(sql,
+        return new HashSet<>(jdbcTemplate.query(
+                sql,
                 (rs, rowNum) -> rs.getLong("user_id"),
-                filmId));
+                filmId
+        ));
     }
 
     private LinkedHashSet<Genre> loadGenres(Long filmId) {
@@ -146,18 +155,18 @@ public class FilmDbStorage implements FilmStorage {
 
     private Mpa loadMpa(Integer mpaId) {
         String sql = "SELECT mpa_id, name FROM mpa WHERE mpa_id = ?";
-        List<Mpa> list = jdbcTemplate.query(sql, (rs, rowNum) -> {
+        List<Mpa> ratings = jdbcTemplate.query(sql, (rs, rowNum) -> {
             Mpa mpa = new Mpa();
             mpa.setId(rs.getInt("mpa_id"));
             mpa.setName(rs.getString("name"));
             return mpa;
         }, mpaId);
 
-        if (list.isEmpty()) {
+        if (ratings.isEmpty()) {
             throw new NotFoundException("Рейтинг с id=" + mpaId + " не найден");
         }
 
-        return list.get(0);
+        return ratings.get(0);
     }
 
     private void saveGenres(Film film) {
@@ -166,8 +175,11 @@ public class FilmDbStorage implements FilmStorage {
         }
 
         String sql = "INSERT INTO genre_films (film_id, genre_id) VALUES (?, ?)";
+
         for (Genre genre : film.getGenres()) {
-            jdbcTemplate.update(sql, film.getId(), genre.getId());
+            if (genre != null && genre.getId() != null) {
+                jdbcTemplate.update(sql, film.getId(), genre.getId());
+            }
         }
     }
 
