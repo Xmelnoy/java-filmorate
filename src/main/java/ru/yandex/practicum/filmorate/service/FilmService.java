@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
@@ -27,7 +28,8 @@ public class FilmService {
     private final UserStorage userStorage;
 
     @Autowired
-    public FilmService(FilmStorage filmStorage, UserStorage userStorage) {
+    public FilmService(@Qualifier("filmDbStorage") FilmStorage filmStorage,
+                       @Qualifier("userDbStorage") UserStorage userStorage) {
         this.filmStorage = filmStorage;
         this.userStorage = userStorage;
     }
@@ -44,10 +46,12 @@ public class FilmService {
         log.debug("Обновление фильма с id: {}", film.getId());
         validateFilm(film);
 
-        if (film.getId() == null || filmStorage.getFilmById(film.getId()) == null) {
-            log.warn("Обновляем несуществующий фильм с id: {}", film.getId());
+        if (film.getId() == null) {
+            log.warn("Попытка обновить фильм без id");
             throw new NotFoundException("Фильм с указанным id не найден");
         }
+
+        filmStorage.getFilmById(film.getId());
 
         Film updatedFilm = filmStorage.updateFilm(film);
         log.debug("Фильм с id {} успешно обновлен", updatedFilm.getId());
@@ -55,12 +59,8 @@ public class FilmService {
     }
 
     public Film getFilmById(Long id) {
-        Film film = filmStorage.getFilmById(id);
-        if (film == null) {
-            log.warn(FILM_NOT_FOUND, id);
-            throw new NotFoundException(FILM_NOT_FOUND_MESSAGE + id + " не найден");
-        }
-        return film;
+        log.debug("Получение фильма с id: {}", id);
+        return filmStorage.getFilmById(id);
     }
 
     public List<Film> getAllFilms() {
@@ -71,20 +71,20 @@ public class FilmService {
     public void addLike(Long filmId, Long userId) {
         log.debug("Пользователь {} ставит лайк фильму {}", userId, filmId);
 
-        Film film = getFilmById(filmId);
-        User user = getUserById(userId);
+        getFilmById(filmId);
+        getUserById(userId);
 
-        film.getLikes().add(user.getId());
+        filmStorage.addLike(filmId, userId);
         log.debug("Лайк успешно добавлен: пользователь {} -> фильм {}", userId, filmId);
     }
 
     public void removeLike(Long filmId, Long userId) {
         log.debug("Пользователь {} удаляет лайк у фильма {}", userId, filmId);
 
-        Film film = getFilmById(filmId);
-        User user = getUserById(userId);
+        getFilmById(filmId);
+        getUserById(userId);
 
-        film.getLikes().remove(user.getId());
+        filmStorage.removeLike(filmId, userId);
         log.debug("Лайк успешно удалён: пользователь {} -> фильм {}", userId, filmId);
     }
 
@@ -98,12 +98,8 @@ public class FilmService {
     }
 
     private User getUserById(Long id) {
-        User user = userStorage.getUserById(id);
-        if (user == null) {
-            log.warn(USER_NOT_FOUND, id);
-            throw new NotFoundException(USER_NOT_FOUND_MESSAGE + id + " не найден");
-        }
-        return user;
+        log.debug("Получение пользователя с id: {}", id);
+        return userStorage.getUserById(id);
     }
 
     private void validateFilm(Film film) {
@@ -130,6 +126,11 @@ public class FilmService {
         if (film.getDuration() <= 0) {
             log.error(VALIDATION_ERROR + "продолжительность фильма должна быть положительной");
             throw new ValidationException("Продолжительность фильма должна быть положительной");
+        }
+
+        if (film.getMpa() == null || film.getMpa().getId() == null) {
+            log.error(VALIDATION_ERROR + "рейтинг MPA должен быть указан");
+            throw new ValidationException("Рейтинг MPA должен быть указан");
         }
     }
 }
